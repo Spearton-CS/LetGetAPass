@@ -34,9 +34,14 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(32, 32, 32);
             ClientSize = new Size(800, 450);
+            ForeColor = Color.White;
             Name = "MainWindow";
             Text = "LetGetAPass";
+            Activated += MainWindow_Activated;
+            Deactivate += MainWindow_Deactivate;
+            FormClosing += MainWindow_FormClosing;
             ResumeLayout(false);
         }
 
