@@ -8,38 +8,52 @@
 
             {
                 bounds.FillBounds((char)48, (char)57); //0-9
-
                 bounds.FillBounds((char)97, (char)122); //a-z
-
                 bounds.FillBounds((char)65, (char)90); //A-Z
 
-                MinCharBounds = bounds;
+                MinCharBounds = bounds.AsReadOnly();
             } //MIN CHAR BOUNDS
 
             {
+                bounds = [.. bounds];
 
+                bounds.FillBounds((char)1040, (char)1071); //А-Я
+                bounds.FillBounds((char)1072, (char)1103); //а-я
+                bounds.FillBounds((char)1024, (char)1039); //Ѐ-Џ
+                bounds.FillBounds((char)1104, (char)1119); //ѐ-џ
+                bounds.FillBounds((char)1168, (char)1169); //"Ґ" "ґ"
+
+                DefaultCharBounds = bounds.AsReadOnly();
             } //DEFAULT CHAR BOUNDS
 
             {
+                bounds = [.. bounds];
 
+                for (char c = char.MinValue; c < char.MaxValue; c++)
+                    if (char.IsLetter(c) && !bounds.Contains(c))
+                        bounds.Add(c);
+
+                MaxCharBounds = bounds.AsReadOnly();
             } //MAX CHAR BOUNDS
 
             List<char> specials;
 
             {
-                MinSpecialsBounds = specials = ['-', '_'];
+                MinSpecialsBounds = (specials = ['-', '_']).AsReadOnly();
             } //MIN SPECIALS BOUNDS
 
             {
+                specials = [.. specials];
                 specials.AddRange(['!', '=', '+', '(', ')', '[', ']', '{', '}']);
 
-                DefaultSpecialsBounds = specials;
+                DefaultSpecialsBounds = specials.AsReadOnly();
             } //DEFAULT SPECIALS BOUNDS
 
             {
-                specials.AddRange();
+                specials = [.. specials];
+                specials.AddRange(['@', '#', '$', ';', ':', '.', '\\', '/', '|', '*', '&', '?', '^', '~', '%', '<', '>']);
 
-                MaxSpecialsBounds = specials;
+                MaxSpecialsBounds = specials.AsReadOnly();
             } //MAX SPECIALS BOUNDS
         }
 
@@ -61,6 +75,8 @@
 
         public static readonly IReadOnlyList<char> MaxCharBounds;
         public static readonly IReadOnlyList<char> MaxSpecialsBounds;
+
+        public static readonly List<char> UserDefinedSpecials = [];
 
         public const byte MinLen = 3;
 
