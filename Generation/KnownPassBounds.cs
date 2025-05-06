@@ -19,9 +19,9 @@
 
                 bounds.FillBounds((char)1040, (char)1071); //А-Я
                 bounds.FillBounds((char)1072, (char)1103); //а-я
-                bounds.FillBounds((char)1024, (char)1039); //Ѐ-Џ
-                bounds.FillBounds((char)1104, (char)1119); //ѐ-џ
-                bounds.FillBounds((char)1168, (char)1169); //"Ґ" "ґ"
+                //bounds.FillBounds((char)1024, (char)1039); //Ѐ-Џ, usually don't allowed
+                //bounds.FillBounds((char)1104, (char)1119); //ѐ-џ, usually don't allowed
+                //bounds.FillBounds((char)1168, (char)1169); //"Ґ" "ґ", usually don't allowed
 
                 DefaultCharBounds = bounds.AsReadOnly();
             } //DEFAULT CHAR BOUNDS
@@ -44,7 +44,9 @@
 
             {
                 specials = [.. specials];
-                specials.AddRange(['!', '=', '+', '(', ')', '[', ']', '{', '}']);
+                specials.AddRange(['!', '=', '+',
+                    //'(', ')', '[', ']', '{', '}' usually don't allowed
+                    ]);
 
                 DefaultSpecialsBounds = specials.AsReadOnly();
             } //DEFAULT SPECIALS BOUNDS

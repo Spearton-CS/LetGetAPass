@@ -1,12 +1,14 @@
 ﻿using LetGetAPass.Structures;
+using System.Security.Cryptography;
 
 namespace LetGetAPass.Generation
 {
     /// <summary>Provides methods for password generation. Supports crypto-random and pseudo-random functions</summary>
     public static class Generator
     {
+        //TODO: Check every requirement for end-pass
         /// <summary>Generates password with length <paramref name="len"/> filled from <paramref name="bounds"/> checking <paramref name="reqs"/> and depending on <paramref name="rnd"/></summary>
-        /// <param name="rnd">Your logic for random number generation</param>
+        /// <param name="rnd">Your logic for random number generation. (First min value - including, second max value - excluding)</param>
         /// <param name="len">Length of password. Defaults used when it less or equal to 0</param>
         /// <param name="bounds">List of chars to generate password</param>
         /// <param name="reqs">Requirements, which must be applied to end password</param>
@@ -49,12 +51,16 @@ namespace LetGetAPass.Generation
 
             char[] gen = new char[len];
 
-
+            for (int i = 0; i < len; i++)
+                gen[i] = bounds[rnd(0, bounds.Count)];
 
             return new string(gen);
 
         }
 
+        #region Pseudo
+
+        #region Built-in
         /// <summary>Using <see cref="Random.Shared"/> with <see cref="Generate(Func{int, int, int}, int, IReadOnlyList{char}?, PasswordRequirements)"/></summary>
         /// <param name="len"></param>
         /// <param name="bounds"></param>
@@ -73,9 +79,209 @@ namespace LetGetAPass.Generation
             Random rnd = new(seed);
             return Generate(rnd.Next, len, bounds, reqs);
         }
-        
-        //OWN PSEUDO-RANDOM
+        #endregion
 
-        //CRYPTO-RANDOM
+        #region GPT coded + own
+        #endregion
+
+        #endregion
+
+        #region Crypto
+
+        #region Built-in
+        /// <summary>Using <see cref="RandomNumberGenerator.GetInt32(int, int)"/> with <see cref="Generate(Func{int, int, int}, int, IReadOnlyList{char}?, PasswordRequirements)"/></summary>
+        /// <param name="len"></param>
+        /// <param name="bounds"></param>
+        /// <param name="reqs"></param>
+        /// <returns></returns>
+        public static string GenCryptoRnd(int len = -1, IReadOnlyList<char>? bounds = null, PasswordRequirements reqs = PasswordRequirements.None)
+            => Generate(RandomNumberGenerator.GetInt32, len, bounds, reqs);
+        #endregion
+
+        #region GPT coded + own
+
+        /// <summary>Using optimized <see cref="GetInt32Sha256(int, int)"/> with <see cref="Generate(Func{int, int, int}, int, IReadOnlyList{char}?, PasswordRequirements)"/></summary>
+        /// <param name="seed"></param>
+        /// <param name="len"></param>
+        /// <param name="bounds"></param>
+        /// <param name="reqs"></param>
+        /// <returns></returns>
+        public static string GenSha256Rnd(byte[]? seed = null, int len = -1, IReadOnlyList<char>? bounds = null, PasswordRequirements reqs = PasswordRequirements.None)
+        {
+            if (seed is null || seed.Length != 32) //Gen seed
+            {
+                seed = new byte[32];
+                RandomNumberGenerator.Fill(seed);
+            }
+
+            byte[] currentHash;
+            using (var hmac = new HMACSHA256(seed)) //The base hash for next generations
+                currentHash = hmac.ComputeHash(seed);
+
+
+            return Generate((int from, int to) =>
+            {
+                uint range = (uint)(to - from);
+
+                // Be sure here's will be no offset
+                uint max = uint.MaxValue - (uint.MaxValue % range);
+
+                uint randomNumber;
+                using (var hmac = new HMACSHA256(seed)) // New HMACSHA256 in each iter, bc its remembers state
+                {
+                    do
+                    {
+                        currentHash = hmac.ComputeHash(currentHash); // Recalc hash
+                        randomNumber = BitConverter.ToUInt32(currentHash, 0);
+                    } while (randomNumber >= max);
+                }
+
+
+
+                return (int)(randomNumber % range) + from;
+            }, len, bounds, reqs);
+        }
+
+        /// <summary>Using optimized <see cref="GetInt32Aes(int, int)"/> with <see cref="Generate(Func{int, int, int}, int, IReadOnlyList{char}?, PasswordRequirements)"/></summary>
+        /// <param name="seed"></param>
+        /// <param name="len"></param>
+        /// <param name="bounds"></param>
+        /// <param name="reqs"></param>
+        /// <returns></returns>
+        public static string GenAesRnd(byte[]? seed = null, int len = -1, IReadOnlyList<char>? bounds = null, PasswordRequirements reqs = PasswordRequirements.None)
+        {
+            if (seed is null || seed.Length != 32) //Gen seed
+                seed = RandomNumberGenerator.GetBytes(32);
+
+            using var aes = Aes.Create();
+            aes.Key = seed; // 256-bit seed
+            aes.Mode = CipherMode.ECB; // There's no CTR in .NET, emulate through ECB
+            aes.Padding = PaddingMode.PKCS7;
+
+            byte[] counter = new byte[16];
+
+            return Generate((int from, int to) =>
+            {
+                uint range = (uint)(to - from);
+
+                RandomNumberGenerator.Fill(counter); //Make random counter
+                byte[] randomBytes = Encrypt(aes, counter);
+
+                uint randomNumber = BitConverter.ToUInt32(randomBytes, 0);
+
+                // Rejection method for be sure there's no offset (bias)
+                uint max = uint.MaxValue - (uint.MaxValue % range);
+                while (randomNumber >= max)
+                {
+                    counter = IncrementCounter(counter);
+                    randomBytes = Encrypt(aes, counter);
+                    randomNumber = BitConverter.ToUInt32(randomBytes, 0);
+                }
+
+                return (int)(randomNumber % range) + from;
+            }, len, bounds, reqs);
+        }
+
+        /// <summary>Method for generate Int32 like in <see cref="RandomNumberGenerator.GetInt32(int, int)"/>, but using SHA256 algo</summary>
+        /// <param name="seed"></param>
+        /// <param name="fromInclusive"></param>
+        /// <param name="toExclusive"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static int GetInt32Sha256(int fromInclusive, int toExclusive, byte[]? seed = null)
+        {
+            if (fromInclusive >= toExclusive)
+                throw new ArgumentException("Invalid range.");
+
+            int range = toExclusive - fromInclusive;
+            if (range <= 0)
+                throw new ArgumentException("Range must be positive.");
+
+            if (seed is null || seed.Length != 32) //Gen seed
+            {
+                seed = new byte[32];
+                RandomNumberGenerator.Fill(seed);
+            }
+
+            using var hmac = new HMACSHA256(seed);
+            byte[] hash = hmac.ComputeHash(seed);
+
+            uint randomNumber = BitConverter.ToUInt32(hash, 0);
+
+            // Avoid offset
+            uint max = uint.MaxValue - (uint.MaxValue % (uint)range);
+            while (randomNumber >= max)
+            {
+                hash = hmac.ComputeHash(hash); // Recalc hash
+                randomNumber = BitConverter.ToUInt32(hash, 0);
+            }
+
+            return (int)(randomNumber % (uint)range) + fromInclusive;
+        }
+
+        /// <summary>Method for generate Int32 like in <see cref="RandomNumberGenerator.GetInt32(int, int)"/>, but using AES algo</summary>
+        /// <param name="fromInclusive"></param>
+        /// <param name="toExclusive"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static int GetInt32Aes(int fromInclusive, int toExclusive, byte[]? seed = null)
+        {
+            if (fromInclusive >= toExclusive)
+                throw new ArgumentException("Invalid range.");
+
+            int range = toExclusive - fromInclusive;
+            if (range <= 0)
+                throw new ArgumentException("Range must be positive.");
+
+            using var aes = Aes.Create();
+            aes.Key = (seed is null || seed.Length != 32)
+                ? RandomNumberGenerator.GetBytes(32)
+                : seed; // 256-bit seed
+            aes.Mode = CipherMode.ECB; // There's no CTR in .NET, emulate through ECB
+            aes.Padding = PaddingMode.PKCS7;
+
+            // Gen rnd counter
+            byte[] counter = new byte[16];
+            RandomNumberGenerator.Fill(counter);
+            byte[] randomBytes = Encrypt(aes, counter);
+
+            uint randomNumber = BitConverter.ToUInt32(randomBytes, 0);
+
+            // Rejection method for be sure there's no offset (bias)
+            uint max = uint.MaxValue - (uint.MaxValue % (uint)range);
+            while (randomNumber >= max)
+            {
+                counter = IncrementCounter(counter);
+                randomBytes = Encrypt(aes, counter);
+                randomNumber = BitConverter.ToUInt32(randomBytes, 0);
+            }
+
+            return (int)(randomNumber % (uint)range) + fromInclusive;
+        }
+        // Shortcut for encrypt through AES
+        private static byte[] Encrypt(Aes aes, byte[] data)
+        {
+            using ICryptoTransform encryptor = aes.CreateEncryptor();
+
+            byte[] encryptedData = encryptor.TransformFinalBlock(data, 0, data.Length);
+            return encryptedData;
+        }
+        // Easy shortcut for counter increment
+        private static byte[] IncrementCounter(byte[] counter)
+        {
+            for (int i = counter.Length - 1; i >= 0; i--)
+            {
+                counter[i]++;
+                if (counter[i] != 0)
+                    return counter;
+            }
+
+            // TODO: gen exception or re-init counter
+            throw new OverflowException("Counter overflow.");
+        }
+
+        #endregion
+
+        #endregion
     }
 }
