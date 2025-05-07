@@ -1,6 +1,6 @@
 ﻿namespace LetGetAPass.Generation
 {
-    //37 - now largest pow of 2 used
+    //41 - now largest pow of 2 used
     [Flags]
     public enum PasswordRequirements : ulong
     {
@@ -35,7 +35,6 @@
         /// <summary>End-pass will don't have letter chars (a-Z)</summary>
         NoLetters = NoUppercase | NoLowercase,
         /// <summary>End-pass will don't have ambiguous chars (1 and I, O and 0...)</summary>
-        [Obsolete("Not implemented")]
         NoAmbiguousChars = 1UL << 31,
 
         #endregion
@@ -128,9 +127,10 @@
         /// <summary>End-pass will have sequence of sequentially letters (abc, bc, xyz)</summary>
         [Obsolete("Not implemented")]
         HaveSequentiallyLetters = 1UL << 28,
-
+        /// <summary>End-pass will have sequence of digits (132, 123, 90)</summary>
         [Obsolete("Not implemented")]
         HaveSequenceOfDigits = 1UL << 38,
+        /// <summary>End-pass will have sequence of letters (abc, cba, help)</summary>
         [Obsolete("Not implemented")]
         HaveSequenceOfLetters = 1UL << 39,
 
@@ -138,12 +138,16 @@
 
         #region End-pass MUST have NO sequence of
 
+        /// <summary>End-pass will don't have sequence of sequentially digits (123, 01, 89)</summary>
         [Obsolete("Not implemented")]
         NoSequentiallyDigits = 1UL << 29,
+        /// <summary>End-pass will don't have sequence of sequentially letters (abc, bc, xyz)</summary>
         [Obsolete("Not implemented")]
         NoSequentiallyLetters = 1UL << 30,
+        /// <summary>End-pass will don't have sequence of digits (132, 123, 90)</summary>
         [Obsolete("Not implemented")]
         NoSequenceOfDigits = 1UL << 40,
+        /// <summary>End-pass will don't have sequence of letters (abc, cba, help)</summary>
         [Obsolete("Not implemented")]
         NoSequenceOfLetters = 1UL << 41,
 

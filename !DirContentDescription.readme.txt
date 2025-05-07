@@ -1,0 +1,11 @@
+﻿LetGetAPass.exe - native app used to run this app in new OWN proccess.
+
+LetGetAPass.dll - .NET app, which contains all main logic.
+
+LetGetAPass.xml - Documentation for public code of .NET app, which can be used for run this app in your proccess, or generation of password without console-mode.
+
+LetGetAPass.deps.json - .NET instruction for this app, like where its external libs, which .NET ver used and other info, that can be required and changed.
+
+LetGetAPass.runtimeconfig.json - .NET instruction for only this app, like settings, frameworks, config.
+
+LetGetAPass.pdb - .NET binary, containing information about DEBUG and exceptions. You can delete if not depending on that app
