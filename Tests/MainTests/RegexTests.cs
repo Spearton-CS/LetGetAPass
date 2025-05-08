@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
 using LetGetAPass.Properties;
 
@@ -7,49 +7,78 @@ namespace MainTests
     [TestClass]
     public sealed class RegexTests
     {
-        [AssemblyInitialize]
-        public static void AssemblyInit(TestContext context)
-        {
-            Regex regex = PortableSettings.IniParamRegex();
-            string l1 = "\"CorrectParam\"=\"Correct Value With Theme\"",
-                l2 = "\"CorrectParam\"=",
-                l3 = "\"CorrectParam\"=Incorrect Value",
-                l4 = "Incorrect Param = Incorrect Value",
-                l5 = "Incorrect Param = \"Correct Value\"";
-            using StreamWriter writer = new(Path.Combine(context.ResultsDirectory ?? Path.GetTempPath(), "regexTests.log"), true, Encoding.UTF8);
-            writer.WriteLine();
-            writer.WriteLine("PortableSettings.IniParamRegex()");
-            writer.WriteLine();
-            writer.Flush();
-            Mbox(l1);
-            Mbox(l2);
-            Mbox(l3);
-            Mbox(l4);
-            Mbox(l5);
+        private Regex iniParamRegex;
 
-            void Mbox(string l)
+        public RegexTests()
+        {
+            iniParamRegex = PortableSettings.IniParamRegex();
+            Debug.WriteLine("Initialized");
+        }
+
+        [TestMethod]
+        public void IniRegexCorrectBoth()
+        {
+            Assert.IsTrue(RegexIsMatch(iniParamRegex, "\"CorrectParam\"=\"Correct Value With Theme\""));
+        }
+
+        [TestMethod]
+        public void IniRegexCorrectEmpty()
+        {
+            Assert.IsTrue(RegexIsMatch(iniParamRegex, "\"CorrectParam\"="));
+        }
+
+        [TestMethod]
+        public void IniRegexCorrectIncorrect()
+        {
+            Assert.IsTrue(RegexIsMatch(iniParamRegex, "\"CorrectParam\"=Incorrect Value"));
+        }
+
+        [TestMethod]
+        public void IniRegexIncorrectBoth()
+        {
+            Assert.IsTrue(RegexIsMatch(iniParamRegex, "Incorrect Param = Incorrect Value"));
+        }
+
+        [TestMethod]
+        public void IniRegexIncorrectEmpty()
+        {
+            Assert.IsTrue(RegexIsMatch(iniParamRegex, "Incorrect Param ="));
+        }
+
+        [TestMethod]
+        public void IniRegexIncorrectCorrect()
+        {
+            Assert.IsTrue(RegexIsMatch(iniParamRegex, "Incorrect Param=\"Correct Value\""));
+        }
+
+        private bool RegexIsMatch(Regex regex, string value)
+        {
+            Debug.WriteLine(value);
+            Match m = regex.Match(value);
+            if (m.Success)
             {
-                writer.WriteLine(l);
-                Match m = regex.Match(l);
-                if (m.Success)
+                Debug.WriteLine("True");
+                Debug.WriteLine(null);
+                Debug.WriteLine($"{m.Groups.Count} groups:");
+                Debug.WriteLine(null);
+                foreach (Group group in m.Groups)
                 {
-                    writer.WriteLine("True");
-                    writer.WriteLine(m.Value);
-                    writer.WriteLine();
-                    writer.WriteLine();
-                    writer.WriteLine($"{m.Groups.Count} groups:");
-                    foreach (Group group in m.Groups)
-                    {
-                        writer.WriteLine($"[{group.Index}] {group.Name}: {group.Value}");
-                        writer.WriteLine();
-                    }
+                    Debug.WriteLine($"[{group.Index}] {group.Name}: {group.Value}");
+                    Debug.WriteLine(null);
                 }
-                else
-                    writer.WriteLine("False");
-                writer.WriteLine();
-                writer.WriteLine();
-                writer.Flush();
+                return true;
             }
+            else
+            {
+                Debug.WriteLine("False");
+                return false;
+            }
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            Debug.WriteLine("----------------------------------");
         }
     }
 }
