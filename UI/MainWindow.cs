@@ -129,5 +129,24 @@ namespace LetGetAPass
         {
             ApplyAppearance(false);
         }
+
+        private void settingsPage_FontSettingChanged(Font font)
+        {
+            Stack<Control> change = [];
+            change.Push(this);
+            while (change.TryPop(out Control? c))
+            {
+                c.Font = font;
+
+                foreach (Control sub in c.Controls)
+                    change.Push(sub);
+            }
+        }
+
+        private void settingsPage_ThemeSettingChanged(ThemeUI theme)
+        {
+            this.theme = theme;
+            ApplyAppearance(true);
+        }
     }
 }

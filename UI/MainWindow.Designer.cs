@@ -35,8 +35,8 @@
             generationTab = new TabPage();
             checkTab = new TabPage();
             settingsTab = new TabPage();
-            iconsList = new ImageList(components);
             settingsPage = new LetGetAPass.UI.Pages.SettingsPage();
+            iconsList = new ImageList(components);
             tabs.SuspendLayout();
             settingsTab.SuspendLayout();
             SuspendLayout();
@@ -72,7 +72,7 @@
             collectionTab.AutoScroll = true;
             collectionTab.Location = new Point(4, 39);
             collectionTab.Name = "collectionTab";
-            collectionTab.Size = new Size(576, 318);
+            collectionTab.Size = new Size(192, 57);
             collectionTab.TabIndex = 1;
             collectionTab.Text = "Collection";
             collectionTab.UseVisualStyleBackColor = true;
@@ -82,7 +82,7 @@
             generationTab.AutoScroll = true;
             generationTab.Location = new Point(4, 39);
             generationTab.Name = "generationTab";
-            generationTab.Size = new Size(576, 318);
+            generationTab.Size = new Size(192, 57);
             generationTab.TabIndex = 2;
             generationTab.Text = "Generation";
             generationTab.UseVisualStyleBackColor = true;
@@ -90,9 +90,9 @@
             // checkTab
             // 
             checkTab.AutoScroll = true;
-            checkTab.Location = new Point(4, 39);
+            checkTab.Location = new Point(4, 74);
             checkTab.Name = "checkTab";
-            checkTab.Size = new Size(576, 318);
+            checkTab.Size = new Size(192, 22);
             checkTab.TabIndex = 4;
             checkTab.Text = "Check";
             checkTab.UseVisualStyleBackColor = true;
@@ -108,20 +108,24 @@
             settingsTab.Text = "Settings";
             settingsTab.UseVisualStyleBackColor = true;
             // 
+            // settingsPage
+            // 
+            settingsPage.AutoScroll = true;
+            settingsPage.Dock = DockStyle.Fill;
+            settingsPage.Font = new Font("Segoe UI", 11F);
+            settingsPage.Location = new Point(0, 0);
+            settingsPage.Margin = new Padding(3, 4, 3, 4);
+            settingsPage.Name = "settingsPage";
+            settingsPage.Size = new Size(576, 318);
+            settingsPage.TabIndex = 0;
+            settingsPage.ThemeSettingChanged += settingsPage_ThemeSettingChanged;
+            settingsPage.FontSettingChanged += settingsPage_FontSettingChanged;
+            // 
             // iconsList
             // 
             iconsList.ColorDepth = ColorDepth.Depth32Bit;
             iconsList.ImageSize = new Size(32, 32);
             iconsList.TransparentColor = Color.Transparent;
-            // 
-            // settingsPage
-            // 
-            settingsPage.AutoScroll = true;
-            settingsPage.Dock = DockStyle.Fill;
-            settingsPage.Location = new Point(0, 0);
-            settingsPage.Name = "settingsPage";
-            settingsPage.Size = new Size(576, 318);
-            settingsPage.TabIndex = 0;
             // 
             // MainWindow
             // 

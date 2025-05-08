@@ -44,8 +44,8 @@
 
             {
                 specials = [.. specials];
-                specials.AddRange(['!', '=', '+',
-                    //'(', ')', '[', ']', '{', '}' usually don't allowed
+                specials.AddRange(['!', '+',
+                    //'=', '(', ')', '[', ']', '{', '}' usually don't allowed
                     ]);
 
                 DefaultSpecialsBounds = specials.AsReadOnly();
