@@ -1,4 +1,5 @@
-﻿using LetGetAPass.UI.Themes;
+﻿using LetGetAPass.Properties;
+using LetGetAPass.UI.Themes;
 using System.Runtime.Versioning;
 
 namespace LetGetAPass.UI.Pages
@@ -13,6 +14,10 @@ namespace LetGetAPass.UI.Pages
         {
             InitializeComponent();
             selectedFontBox.Text = GetShortFontName(Font);
+            using FileStream fs = File.Open("settings.ini", FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
+            using StreamReader reader = new(fs);
+            fs.Position = 0;
+            PortableSettings.Shared.TrySync(reader);
         }
 
         public event Action<ThemeUI>? ThemeSettingChanged;
