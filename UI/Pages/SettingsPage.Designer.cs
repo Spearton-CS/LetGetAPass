@@ -171,6 +171,7 @@
             Margin = new Padding(3, 4, 3, 4);
             Name = "SettingsPage";
             Size = new Size(350, 550);
+            Load += SettingsPage_Load;
             mainGroup.ResumeLayout(false);
             mainSettingsTable.ResumeLayout(false);
             mainSettingsTable.PerformLayout();

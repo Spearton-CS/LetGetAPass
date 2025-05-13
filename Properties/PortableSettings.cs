@@ -10,7 +10,8 @@ namespace LetGetAPass.Properties
         protected readonly Dictionary<string, object?> defaults = new()
         {
             { "selectedtheme", "Default DARK" },
-            { "selectedfont", new Font("Segoe UI", 11, FontStyle.Regular) }
+            { "selectedfont", new Font("Segoe UI", 11, FontStyle.Regular) },
+            { "dologs", true }
         };
         protected Dictionary<string, object?> settings = [];
 
@@ -48,6 +49,40 @@ namespace LetGetAPass.Properties
             => defaults.TryGetValue(setting.ToLower(), out var value)
             ? value
             : throw new KeyNotFoundException("No such setting in current config or defaults");
+
+        /// <summary>Trying to get (1) current or (2) default value for <paramref name="setting"/>, cast to <typeparamref name="T"/></summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="setting"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidCastException">Can't cast current or default value to <typeparamref name="T"/></exception>
+        /// <exception cref="KeyNotFoundException">No such setting in current config or defaults</exception>
+        public T? GetValueAsT<T>(string setting)
+        {
+            if (settings.TryGetValue(setting, out object? value))
+                try
+                {
+                    return (T?)value;
+                }
+                catch (InvalidCastException ice)
+                {
+                    if (defaults.TryGetValue(setting, out value))
+                        return (T?)value;
+                    else
+                        throw new InvalidCastException($"No such setting in defaults. Can't cast current value to '{typeof(T).Name}'", ice);
+                }
+            else if (defaults.TryGetValue(setting, out value))
+                try
+                {
+                    return (T?)value;
+                }
+                catch (InvalidCastException ice)
+                {
+                    throw new InvalidCastException($"No such setting in current config. Can't cast default value to '{typeof(T).Name}'", ice);
+                }
+            else
+                throw new KeyNotFoundException("No such setting in current config or defaults");
+        }
+
         public bool Remove(string setting, out object? value) => settings.Remove(setting, out value);
         public void Clear() => settings.Clear();
 
