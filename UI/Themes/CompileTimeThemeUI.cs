@@ -1,6 +1,9 @@
-﻿namespace LetGetAPass.UI.Themes
+﻿using System.Runtime.Versioning;
+
+namespace LetGetAPass.UI.Themes
 {
     /// <summary>UI Theme, that known at compilation time. Prefixes: A - Active, InA - Inactive, D - Death, L - Link, S - Strict, W - Window</summary>
+    [SupportedOSPlatform("windows")]
     public abstract class CompileTimeThemeUI : ThemeUI
     {
         public string Name { get; init; }
@@ -70,5 +73,7 @@
         public Color InASForeground { get; init; }
 
         public Color DSForeground { get; init; }
+
+        public IReadOnlyDictionary<string, Image> Icons { get; init; }
     }
 }

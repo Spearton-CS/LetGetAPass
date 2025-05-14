@@ -26,7 +26,7 @@ namespace LetGetAPass.UI.Pages
                 Font old = Font;
                 if (old.CompareFont(fontDialog.Font))
                 {
-                    PortableLogger.Shared?.Log($"{logPrefix} '{old.ToInformationalString}' already selected");
+                    PortableLogger.Shared?.Log($"{logPrefix} '{old.ToInformationalString()}' already selected");
                     return;
                 }
 
@@ -53,7 +53,7 @@ namespace LetGetAPass.UI.Pages
                 if (old.CompareFont(defaultFont))
                 {
                     PortableLogger.Shared?.Log($"{logPrefix} Trying to restore font to default," +
-                        $" but '{defaultFont.ToInformationalString}' already selected");
+                        $" but '{defaultFont.ToInformationalString()}' already selected");
                     return;
                 }
                 FontSettingChanged?.Invoke(defaultFont);

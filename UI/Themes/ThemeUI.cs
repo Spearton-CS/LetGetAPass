@@ -1,6 +1,9 @@
-﻿namespace LetGetAPass.UI.Themes
+﻿using System.Runtime.Versioning;
+
+namespace LetGetAPass.UI.Themes
 {
     /// <summary>Interface, which applied to UI-themes. Prefixes: A - Active, InA - Inactive, D - Death, L - Link, S - Strict, W - Window</summary>
+    [SupportedOSPlatform("windows")]
     public interface ThemeUI
     {
         public string Name { get; }
@@ -59,6 +62,12 @@
         public Color WACaptionForeground { get; }
         public Color WInACaptionForeground { get; }
         public Color WDCaptionForeground { get; }
+
+        #endregion
+
+        #region Icons
+
+        public IReadOnlyDictionary<string, Image> Icons { get; }
 
         #endregion
     }

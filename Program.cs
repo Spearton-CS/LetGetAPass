@@ -15,9 +15,22 @@ LetGetAPass use log-name format: (0-255).log, where first line containing Date a
         {
             ApplicationConfiguration.Initialize();
 
+            object?[] values = new object?[10];
+            for (int i = 0; i < 10; i++)
+                values[i] = null;
+
+            var sb = new System.Text.StringBuilder();
+            for (int i = 1; i < 10; i++)
+                sb.AppendLine((values[i] == values[0]).ToString());
+            MessageBox.Show(sb.ToString());
+
+            return;
+
             InitializeLogger();
 
             Application.Run(new MainWindow());
+
+            PortableLogger.Shared?.Dispose();
         }
 
         static void InitializeLogger()
@@ -49,7 +62,7 @@ LetGetAPass use log-name format: (0-255).log, where first line containing Date a
                 }
                 catch (Exception ex)
                 {
-                    errors.Enqueue(ex);
+                    errors.Enqueue(new Exception("Caught exception, when tried to create readme file (Log dir)", ex));
                 }
             }
 
@@ -62,13 +75,27 @@ LetGetAPass use log-name format: (0-255).log, where first line containing Date a
                 {
                     if (!File.Exists(logPath))
                     {
-                        logger = PortableLogger.CreateShared(File.Create(logPath));
+                        FileStream fs = File.Open(logPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                        logger = PortableLogger.CreateShared(fs);
                         logger.Log($"Created new file {logPath}");
+                        break;
                     }
                 }
                 catch (Exception ex)
                 {
-                    errors.Enqueue(ex);
+                    if (File.Exists(logPath))
+                        try
+                        {
+                            File.Delete(logPath);
+                            errors.Enqueue(new Exception($"Caught exception, when tried to create log file '{logPath}'. File was created, but cleanup successful", ex));
+                        }
+                        catch (Exception ex2)
+                        {
+                            errors.Enqueue(new Exception($"Caught exception, when tried to create log file '{logPath}'. File was created, but cleanup get exception" +
+                                $"\r\nInner exception (first): {ex}", ex2));
+                        }
+                    else
+                        errors.Enqueue(new Exception($"Caught exception, when tried to create log file '{logPath}'. No file created", ex));
                 }
             }
 

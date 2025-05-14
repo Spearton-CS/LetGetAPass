@@ -1,10 +1,19 @@
-﻿using System.Diagnostics;
+﻿using LetGetAPass.Structures;
+using System.Diagnostics;
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace LetGetAPass.UI.Themes
 {
+    [SupportedOSPlatform("windows")]
     public class UserDefinedThemeUI : ThemeUI
     {
+        public UserDefinedThemeUI()
+        {
+            Dictionary<string, Image> icons = [];
+            Icons = new(icons);
+        }
+
         public static readonly char[] SerializationFormatSign = ['L', 'G', 'M', 'A', 'P', '_', 'U', 'D', '_', 'T', 'H', 'E', 'M', 'E'];
 
         public static bool TryDeserialize(Stream input, out UserDefinedThemeUI? theme)
@@ -210,6 +219,9 @@ namespace LetGetAPass.UI.Themes
         public Color WInACaptionForeground { get; set; }
 
         public Color WDCaptionForeground { get; set; }
+
+        public ModifyOnlyDictionary<string, Image> Icons { get; init; }
+        IReadOnlyDictionary<string, Image> ThemeUI.Icons => Icons;
         #endregion
     }
 }

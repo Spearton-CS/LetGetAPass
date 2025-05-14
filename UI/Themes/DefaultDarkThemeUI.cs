@@ -1,5 +1,8 @@
-﻿namespace LetGetAPass.UI.Themes
+﻿using System.Runtime.Versioning;
+
+namespace LetGetAPass.UI.Themes
 {
+    [SupportedOSPlatform("windows")]
     public class DefaultDarkThemeUI : CompileTimeThemeUI
     {
         public DefaultDarkThemeUI()
@@ -54,6 +57,14 @@
                 InALForeground = Color.DarkKhaki;
                 DLForeground = Color.Red;
             } //Controls
+
+            {
+                Dictionary<string, Image> icons = new()
+                {
+                    { "restore", (Image)Properties.Resources.ResourceManager.GetObject("restoreLight")! }
+                };
+                Icons = icons;
+            } //Icons
         }
     }
 }

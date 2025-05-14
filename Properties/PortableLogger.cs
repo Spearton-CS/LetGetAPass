@@ -23,13 +23,13 @@ namespace LetGetAPass.Properties
 
         private void WorkerLogic()
         {
-            const string dtFormat = "dd.hh.mm.ss",
+            const string dtFormat = "dd.hh:mm.ss",
                 logSeparator = "===========================================";
 
             StreamWriter logger = new(output, System.Text.Encoding.BigEndianUnicode, -1, true);
             var work = this.work;
 
-            logger.WriteLine($"{Thread.CurrentThread.Name} initialized at {DateTime.Now:yyyy.MM.dd hh.mm.ss}");
+            logger.WriteLine($"{Thread.CurrentThread.Name} initialized at {DateTime.Now:yyyy.MM.dd hh.mm:ss}");
             logger.WriteLine(logSeparator);
             logger.Flush();
 
@@ -39,7 +39,7 @@ namespace LetGetAPass.Properties
                 {
                     if (line is null)
                         logger.WriteLine($"{DateTime.Now.ToString(dtFormat)}: null");
-                    if (line is IEnumerable lines)
+                    if (line is IEnumerable lines && lines is not IEnumerable<char>)
                     {
                         logger.WriteLine(DateTime.Now.ToString(dtFormat));
                         foreach (var realLine in lines)
